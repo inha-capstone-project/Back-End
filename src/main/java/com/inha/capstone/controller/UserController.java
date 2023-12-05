@@ -1,9 +1,12 @@
 package com.inha.capstone.controller;
 
 
+import com.inha.capstone.Dto.ApplicationDto;
+import com.inha.capstone.Dto.ApplicationDto.ApplicationListResponse;
 import com.inha.capstone.Dto.Token;
 import com.inha.capstone.Dto.UserDto.CreateUserRequest;
 import com.inha.capstone.config.BaseResponse;
+import com.inha.capstone.domain.Application;
 import com.inha.capstone.domain.User;
 import com.inha.capstone.service.UserService;
 
@@ -13,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -82,6 +86,17 @@ public class UserController {
         log.info(getResponseLog(GET, endpointPath, null, response));
         return ResponseEntity.ok()
                 .body(new BaseResponse<>(response));
+    }
+
+    @GetMapping("/users/{userId}/myApps")
+    public ResponseEntity<BaseResponse<List<ApplicationListResponse>>> getMyApp(Principal principal, @PathVariable Long userId){
+        User user = userService.findByUserId(principal.getName());
+        List<ApplicationListResponse> appList = user.getApplicationList().stream()
+                .map(app -> new ApplicationListResponse(app))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok()
+                .body(new BaseResponse<>(appList));
     }
 
 }
